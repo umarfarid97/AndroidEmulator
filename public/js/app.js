@@ -216,6 +216,24 @@ btnRefresh.addEventListener('click', async () => {
   await fetchStatus();
 });
 
+const btnQuitStudio = document.getElementById('btnQuitStudio');
+if (btnQuitStudio) {
+  btnQuitStudio.addEventListener('click', async () => {
+    if (!confirm('Are you sure you want to quit the Android Test Studio and shut down the background server?')) return;
+    try {
+      showToast('Shutting down Studio...', 'info');
+      await fetch('/api/server/quit', { method: 'POST' });
+    } catch (_) {}
+    window.close();
+    document.body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;color:#9ca3af;font-family:sans-serif;">
+        <h2 style="color:#fff;">Studio Closed</h2>
+        <p>The background server has been stopped. You can safely close this window.</p>
+      </div>
+    `;
+  });
+}
+
 // ---------------- APK UPLOAD & DRAG & DROP ----------------
 btnBrowseApk.addEventListener('click', (e) => {
   e.stopPropagation();

@@ -83,14 +83,19 @@ flowchart TD
 
 ## 🚀 Quick Start (Windows)
 
-### Method 1: One-Click Launcher
+### Method 1: One-Click Background Launcher (No CMD Window)
 Simply double-click:
 ```bat
 start.bat
 ```
-This automatically verifies dependencies, starts the studio, and launches the desktop application window.
+* Or double-click `start-background.vbs` directly.
+* **Zero Console Window**: It immediately starts the Studio server silently in the background, closes CMD right away, and opens the clean desktop application window.
 
-### Method 2: Command Line
+### Stopping the Studio
+* **In the App**: Click the red **Quit** button in the top header.
+* **Or via File Explorer**: Double-click `stop.bat` to cleanly terminate any background instance.
+
+### Method 2: Command Line (Interactive)
 ```bash
 # 1. Clone repository
 git clone https://github.com/umarfarid97/AndroidEmulator.git

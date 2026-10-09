@@ -12,6 +12,20 @@ const emulator = require('./emulator');
 const { parseApk } = require('./apkParser');
 const { LogcatSession } = require('./logcatStreamer');
 
+// Log startup to file for background monitoring
+const logFile = path.join(__dirname, '..', 'server.log');
+fs.writeFileSync(logFile, `[${new Date().toISOString()}] Server process initialized (PID: ${process.pid})\n`);
+
+process.on('uncaughtException', (err) => {
+  fs.appendFileSync(logFile, `[ERROR] Uncaught: ${err.stack || err}\n`);
+});
+process.on('unhandledRejection', (reason) => {
+  fs.appendFileSync(logFile, `[ERROR] Rejection: ${reason}\n`);
+});
+process.on('exit', (code) => {
+  fs.appendFileSync(logFile, `[INFO] Process exited with code ${code}\n`);
+});
+
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
@@ -252,6 +266,14 @@ app.post('/api/device/screenshot', async (req, res) => {
   }
 });
 
+// Shutdown Server Endpoint
+app.post('/api/server/quit', (req, res) => {
+  res.json({ success: true, message: 'Shutting down server...' });
+  setTimeout(() => {
+    process.exit(0);
+  }, 500);
+});
+
 // Serve screenshots folder
 app.use('/screenshots', express.static(path.join(__dirname, '..', 'screenshots')));
 
@@ -288,7 +310,12 @@ wss.on('connection', (ws) => {
 });
 
 // ---------------- LAUNCH LOGIC ----------------
+server.on('error', (err) => {
+  fs.appendFileSync(logFile, `[ERROR] Server error: ${err.stack || err}\n`);
+});
+
 server.listen(PORT, () => {
+  fs.appendFileSync(logFile, `[INFO] Server successfully listening on port ${PORT}\n`);
   const url = `http://localhost:${PORT}`;
   console.log(`\n======================================================`);
   console.log(`  🚀 Android Emulator & APK Test Studio is running!  `);
