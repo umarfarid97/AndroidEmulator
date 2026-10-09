@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Android Emulator & APK Test Studio</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="3" />
+            <path d="M12 18h.01" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="logo-title">Android Test Studio</h1>
+          <span class="logo-subtitle">Desktop Emulator & APK Testing Suite</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="device-selector-wrapper">
+          <span class="status-indicator" id="deviceStatusDot"></span>
+          <select id="deviceSelect" class="select-input">
+            <option value="">Searching for devices...</option>
+          </select>
+        </div>
+
+        <button id="btnLaunchEmulator" class="btn btn-primary" title="Launch Android Virtual Device">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Launch AVD
+        </button>
+
+        <button id="btnStopEmulator" class="btn btn-secondary" title="Stop current emulator">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+          Stop
+        </button>
+
+        <button id="btnRefresh" class="btn btn-icon" title="Refresh status / Restart ADB">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Workspace -->
+    <main class="main-workspace">
+      <!-- Left Column: Device & APK Testing Panel -->
+      <section class="panel-left">
+        <!-- Device Info Card -->
+        <div class="card device-card">
+          <div class="card-header">
+            <h3>Connected Device</h3>
+            <span class="badge" id="deviceBadge">Checking</span>
+          </div>
+          <div class="device-specs" id="deviceSpecs">
+            <div class="spec-item">
+              <span class="spec-label">Model:</span>
+              <span class="spec-value" id="specModel">-</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Android OS:</span>
+              <span class="spec-value" id="specVersion">-</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Serial:</span>
+              <span class="spec-value" id="specSerial">-</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Battery:</span>
+              <span class="spec-value" id="specBattery">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- APK Drag & Drop Upload Zone -->
+        <div class="card apk-card">
+          <div class="card-header">
+            <h3>APK Installer & Tester</h3>
+            <span class="badge badge-accent">Drag & Drop</span>
+          </div>
+
+          <div class="dropzone" id="apkDropzone">
+            <input type="file" id="apkFileInput" accept=".apk" class="file-input-hidden">
+            <div class="dropzone-content">
+              <div class="dropzone-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                </svg>
+              </div>
+              <h4 class="dropzone-title">Drop APK file here to test</h4>
+              <p class="dropzone-subtitle">or <button type="button" class="link-btn" id="btnBrowseApk">browse file</button> from your PC</p>
+            </div>
+
+            <!-- Upload Progress Bar -->
+            <div class="upload-progress-container" id="uploadProgressContainer" style="display: none;">
+              <div class="progress-bar">
+                <div class="progress-fill" id="uploadProgressFill"></div>
+              </div>
+              <span class="progress-text" id="uploadProgressText">Uploading 0%</span>
+            </div>
+          </div>
+
+          <!-- Parsed APK Details View -->
+          <div class="apk-details-panel" id="apkDetailsPanel" style="display: none;">
+            <div class="apk-header-info">
+              <div class="apk-icon-placeholder">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm1 14h-2v2h2v-2zm0-10h-2v8h2V6z"/>
+                </svg>
+              </div>
+              <div class="apk-titles">
+                <h4 id="apkAppName">App Name</h4>
+                <code id="apkPackageName">com.example.app</code>
+              </div>
+            </div>
+
+            <div class="apk-meta-grid">
+              <div class="meta-item">
+                <span class="meta-label">Version:</span>
+                <span class="meta-value" id="apkVersion">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">File Size:</span>
+                <span class="meta-value" id="apkSize">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Min / Target SDK:</span>
+                <span class="meta-value" id="apkSdk">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Main Activity:</span>
+                <span class="meta-value code-truncate" id="apkActivity">-</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="apk-actions">
+              <button id="btnInstallLaunch" class="btn btn-success btn-block">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                Install & Auto-Launch
+              </button>
+
+              <div class="app-control-grid">
+                <button id="btnRestartApp" class="btn btn-secondary btn-sm" title="Relaunch application">
+                  🔄 Restart App
+                </button>
+                <button id="btnClearData" class="btn btn-secondary btn-sm" title="Clear app cache and data">
+                  🧹 Clear Data
+                </button>
+                <button id="btnForceStop" class="btn btn-secondary btn-sm" title="Force stop app">
+                  ⚡ Force Stop
+                </button>
+                <button id="btnUninstall" class="btn btn-danger btn-sm" title="Uninstall app">
+                  🗑 Uninstall
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Device Navigation & Controls -->
+        <div class="card controls-card">
+          <div class="card-header">
+            <h3>Device Navigation</h3>
+          </div>
+          <div class="nav-button-group">
+            <button class="nav-btn" data-key="4" title="Back (KeyEvent 4)">◀ Back</button>
+            <button class="nav-btn" data-key="3" title="Home (KeyEvent 3)">⏺ Home</button>
+            <button class="nav-btn" data-key="187" title="Recents (KeyEvent 187)">▢ Recents</button>
+            <button class="nav-btn" data-key="26" title="Power / Lock (KeyEvent 26)">⚡ Power</button>
+            <button class="nav-btn" data-key="24" title="Volume Up (KeyEvent 24)">🔊 Vol +</button>
+            <button class="nav-btn" data-key="25" title="Volume Down (KeyEvent 25)">🔉 Vol -</button>
+            <button class="nav-btn btn-highlight" id="btnTakeScreenshot" title="Capture Screenshot">📸 Screenshot</button>
+          </div>
+
+          <!-- Quick Text Typing Input -->
+          <div class="quick-text-box">
+            <input type="text" id="inputSendText" placeholder="Type text to send to emulator..." class="text-input">
+            <button id="btnSendText" class="btn btn-secondary">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Real-Time Logcat Crash & Debug Console -->
+      <section class="panel-right">
+        <div class="card logcat-card">
+          <div class="logcat-header">
+            <div class="logcat-title-group">
+              <h3>Live Logcat & Crash Monitor</h3>
+              <div class="live-pulse" title="Streaming logs in real-time"></div>
+            </div>
+
+            <div class="logcat-controls">
+              <!-- Filter by level -->
+              <select id="logLevelSelect" class="select-input select-sm">
+                <option value="">All Levels</option>
+                <option value="D">Debug & Above</option>
+                <option value="I">Info & Above</option>
+                <option value="W">Warnings & Errors</option>
+                <option value="E">Errors Only</option>
+                <option value="F">Fatal Crashes</option>
+              </select>
+
+              <!-- App package filter toggle -->
+              <label class="toggle-label" title="Filter logs to active tested package">
+                <input type="checkbox" id="toggleAppOnlyFilter" checked>
+                <span>App Only</span>
+              </label>
+
+              <!-- Search Bar -->
+              <input type="text" id="logSearchInput" placeholder="Search logs / exceptions..." class="text-input input-sm">
+
+              <button id="btnClearLogs" class="btn btn-icon btn-sm" title="Clear console">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+
+              <button id="btnExportLogs" class="btn btn-icon btn-sm" title="Export logs as .txt">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Crash Alert Banner -->
+          <div class="crash-alert-banner" id="crashAlertBanner" style="display: none;">
+            <div class="crash-icon">⚠️</div>
+            <div class="crash-text">
+              <strong id="crashTitle">Crash Detected!</strong>
+              <p id="crashSummary">Unhandled exception captured in Logcat.</p>
+            </div>
+            <button class="btn btn-sm btn-outline" id="btnDismissCrash">Dismiss</button>
+          </div>
+
+          <!-- Console Terminal Container -->
+          <div class="logcat-console" id="logcatConsole">
+            <div class="log-placeholder">
+              Connect a device or launch an emulator to stream live Android logs...
+            </div>
+          </div>
+
+          <!-- Console Footer -->
+          <div class="logcat-footer">
+            <span id="logCountText">0 lines</span>
+            <div class="autoscroll-toggle">
+              <label>
+                <input type="checkbox" id="toggleAutoScroll" checked> Auto-scroll
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

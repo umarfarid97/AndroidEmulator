@@ -1,0 +1,28 @@
+{
+  "name": "android-emulator-studio",
+  "version": "1.0.0",
+  "description": "Desktop Android Emulator Controller & One-Click APK Testing Studio",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js --dev",
+    "cli": "node src/cli.js"
+  },
+  "keywords": [
+    "android",
+    "emulator",
+    "apk-testing",
+    "adb",
+    "avd",
+    "logcat",
+    "developer-tools"
+  ],
+  "author": "umarfarid97",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
+    "ws": "^8.18.0"
+  }
+}
